@@ -21,7 +21,6 @@ var inputModule = angular.module('material.components.input', [
   .animation('.md-input-focused', mdInputFocusedAnimation)
   .animation('.md-input-messages-animation', ngMessagesAnimation)
   .animation('.md-input-message-animation', ngMessageAnimation)
-  .animation('.md-input-hint-animation', mdInputHintAnimation);
 
 // If we are running inside of tests; expose some extra services so that we can test them
 if (window._mdMocksIncluded) {
@@ -1055,19 +1054,17 @@ function mdInputInvalidMessagesAnimation($$AnimateRunner, $animateCss, $mdUtil) 
 
   return {
     addClass: function(element, className, done) {
-      console.log('adding class: '+className);
       hideHintMessage(element, done);
       showInputMessages(element, done);
     },
 
     removeClass: function(element, className, done) {
       if (className === 'md-input-invalid') {
-        console.log('removing class: '+className);
+        // NOTE: We do not need the hide error messages, because the message ng-leave animation will fire
         showHintMessage(element, done);
       }
     }
 
-    // NOTE: We do not need the removeClass method, because the message ng-leave animation will fire
   };
 }
 
@@ -1077,53 +1074,15 @@ function mdInputFocusedAnimation($$AnimateRunner, $animateCss, $mdUtil, $log) {
   return {
     addClass: function(element, className, done) {
       if (className === 'md-input-focused' && !element.hasClass('md-input-invalid')) {
-        console.log('adding class: '+className);
         showHintMessage(element, done);
       }
     },
 
     removeClass: function(element, className, done) {
-      console.log('removing class: '+className);
       hideHintMessage(element, done);
     }
-
-    // NOTE: We do not need the removeClass method, because the message ng-leave animation will fire
   };
 }
-
-
-function mdInputHintAnimation($$AnimateRunner, $animateCss, $mdUtil, $log) {
-  saveSharedServices($$AnimateRunner, $animateCss, $mdUtil, $log);
-
-  return {
-    enter: function (element, done) {
-      console.log('entering input hint animation');
-    },
-
-    addClass: function(element, className, done) {
-      console.log('adding class to hint');
-      if (className == "ng-hide") {
-        hideInputMessages(element, done);
-        var animator = hideMessage(element);
-        animator.start().done(done);
-      } else {
-        done();
-      }
-    },
-
-    removeClass: function(element, className, done) {
-      console.log('removing class from hint');
-      if (className == "ng-hide") {
-        showInputMessages(element, done);
-        var animator = showMessage(element);
-        animator.start().done(done);
-      } else {
-        done();
-      }
-    }
-  };
-}
-
 
 function ngMessagesAnimation($$AnimateRunner, $animateCss, $mdUtil, $log) {
   saveSharedServices($$AnimateRunner, $animateCss, $mdUtil, $log);
