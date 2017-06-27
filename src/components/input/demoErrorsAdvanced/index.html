@@ -15,15 +15,9 @@
             <span hide-xs hide-sm>to the right</span>
             <span hide-gt-sm>below</span>
 
-            to see the messages switch between some custom hints, and the actual error messages.
-            Note that some of the <code>ng-messages</code> containers use <code>ngIf</code> while
-            others use <code>ng-show</code> or <code>ng-hide</code>.
-          </p>
+            to see the messages switch between some custom hints, and the actual error messages.  Note that some of the <code>ng-messages</code> containers use <code>ngIf</code> while others use <code>ng-show</code> or <code>ng-hide</code>.  </p>
         </div>
 
-        <md-input-container>
-          <md-switch ng-model="showHints">Showing {{showHints ? "Hints" : "Errors"}}</md-switch>
-        </md-input-container>
       </div>
 
       <div layout-gt-sm="row">
@@ -81,10 +75,9 @@
           <label>Phone Number</label>
           <input name="phone" ng-model="user.phone" ng-pattern="/^[(][0-9]{3}[)] [0-9]{3}-[0-9]{4}$/" />
 
-          <div class="hint" ng-show="showHints">(###) ###-####</div>
-
-          <div ng-messages="userForm.phone.$error" ng-hide="showHints">
+          <div ng-messages="userForm.phone.$error">
             <div ng-message="pattern">(###) ###-#### - Please enter a valid phone number.</div>
+            <div md-input-hint>(###) ###-####</div>
           </div>
         </md-input-container>
 
