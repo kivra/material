@@ -13,12 +13,14 @@ var inputModule = angular.module('material.components.input', [
   .directive('placeholder', placeholderDirective)
   .directive('ngMessages', ngMessagesDirective)
   .directive('ngMessage', ngMessageDirective)
+  .directive('mdInputHint', mdInputHintDirective)
   .directive('ngMessageExp', ngMessageDirective)
   .directive('mdSelectOnFocus', mdSelectOnFocusDirective)
 
   .animation('.md-input-invalid', mdInputInvalidMessagesAnimation)
   .animation('.md-input-messages-animation', ngMessagesAnimation)
-  .animation('.md-input-message-animation', ngMessageAnimation);
+  .animation('.md-input-message-animation', ngMessageAnimation)
+  .animation('.md-input-hint-animation', mdInputHintAnimation);
 
 // If we are running inside of tests; expose some extra services so that we can test them
 if (window._mdMocksIncluded) {
@@ -971,7 +973,74 @@ function ngMessageDirective($mdUtil) {
   }
 }
 
-var $$AnimateRunner, $animateCss, $mdUtil;
+function mdInputHintDirective($mdUtil, $animate) {
+  return {
+    restrict: 'EA',
+    link: link,
+    scope: {
+      mdInputHint: '='
+    },
+    priority: 100
+  };
+
+  function link(scope, tElement) {
+    if (!isInsideInputContainer(tElement)) {
+
+      // When the current element is inside of a document fragment, then we need to check for an input-container
+      // in the postLink, because the element will be later added to the DOM and is currently just in a temporary
+      // fragment, which causes the input-container check to fail.
+      if (isInsideFragment()) {
+        return function (scope, element) {
+          if (isInsideInputContainer(element)) {
+            // Inside of the postLink function, a ngMessage directive will be a comment element, because it's
+            // currently hidden. To access the shown element, we need to use the element from the compile function.
+            initMessageElement(tElement);
+          }
+        };
+      }
+    } else {
+      initMessageElement(tElement);
+    }
+
+    function isInsideFragment() {
+      var nextNode = tElement[0];
+      while (nextNode = nextNode.parentNode) {
+        if (nextNode.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function isInsideInputContainer(element) {
+      return !!$mdUtil.getClosest(element, "md-input-container");
+    }
+
+    function initMessageElement(element) {
+      // var mdInputEl = element.parent().find('input');
+      // mdInputEl.on('focus', function () {
+      //   console.log('focusing');
+      //   element.append('<div>'+scope.mdInputHint+'</div>');
+      //   console.log(childEl);
+      //   // element.removeClass("ng-hide");
+      //   // $animate.removeClass(element, "ng-hide");
+      // });
+      // mdInputEl.on('blur', function () {
+      //   console.log('blurring');
+      //   element.empty();
+      //   // element.addClass("ng-hide");
+      //   // $animate.addClass(element, "ng-hide");
+      // });
+
+      element.toggleClass("md-auto-hide", true);
+      element.toggleClass("md-input-hint-animation", true);
+      // Add our animation class
+    }
+  }
+}
+
+
+var $$AnimateRunner, $animateCss, $mdUtil, $log;
 
 function mdInputInvalidMessagesAnimation($$AnimateRunner, $animateCss, $mdUtil) {
   saveSharedServices($$AnimateRunner, $animateCss, $mdUtil);
@@ -985,8 +1054,41 @@ function mdInputInvalidMessagesAnimation($$AnimateRunner, $animateCss, $mdUtil) 
   };
 }
 
-function ngMessagesAnimation($$AnimateRunner, $animateCss, $mdUtil) {
-  saveSharedServices($$AnimateRunner, $animateCss, $mdUtil);
+function mdInputHintAnimation($$AnimateRunner, $animateCss, $mdUtil, $log) {
+  saveSharedServices($$AnimateRunner, $animateCss, $mdUtil, $log);
+
+  return {
+    enter: function (element, done) {
+      console.log('entering input hint animation');
+    },
+
+    addClass: function(element, className, done) {
+      console.log('adding class to hint');
+      if (className == "ng-hide") {
+        hideInputMessages(element, done);
+        var animator = hideMessage(element);
+        animator.start().done(done);
+      } else {
+        done();
+      }
+    },
+
+    removeClass: function(element, className, done) {
+      console.log('removing class from hint');
+      if (className == "ng-hide") {
+        showInputMessages(element, done);
+        var animator = showMessage(element);
+        animator.start().done(done);
+      } else {
+        done();
+      }
+    }
+  };
+}
+
+
+function ngMessagesAnimation($$AnimateRunner, $animateCss, $mdUtil, $log) {
+  saveSharedServices($$AnimateRunner, $animateCss, $mdUtil, $log);
 
   return {
     enter: function(element, done) {
@@ -1083,9 +1185,11 @@ function showMessage(element) {
 
   // If we have the md-auto-hide class, the md-input-invalid animation will fire, so we can skip
   if (alreadyVisible || (messages.hasClass('md-auto-hide') && !container.hasClass('md-input-invalid'))) {
+    console.log('skipping showing of message', element);
     return $animateCss(element, {});
   }
 
+  console.log('showing message', element);
   return $animateCss(element, {
     event: 'enter',
     structural: true,
