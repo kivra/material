@@ -18,6 +18,7 @@ var inputModule = angular.module('material.components.input', [
   .directive('mdSelectOnFocus', mdSelectOnFocusDirective)
 
   .animation('.md-input-invalid', mdInputInvalidMessagesAnimation)
+  .animation('.md-input-focused', mdInputFocusedAnimation)
   .animation('.md-input-messages-animation', ngMessagesAnimation)
   .animation('.md-input-message-animation', ngMessageAnimation)
   .animation('.md-input-hint-animation', mdInputHintAnimation);
@@ -156,7 +157,11 @@ function mdInputContainerDirective($mdTheming, $parse, $$rAF) {
     };
     self.element = $element;
     self.setFocused = function(isFocused) {
-      $element.toggleClass('md-input-focused', !!isFocused);
+      if (isFocused) {
+        $animate.addClass($element, 'md-input-focused');
+      } else {
+        $animate.removeClass($element, 'md-input-focused');
+      }
     };
     self.setHasValue = function(hasValue) {
       $element.toggleClass('md-input-has-value', !!hasValue);
@@ -1017,6 +1022,9 @@ function mdInputHintDirective($mdUtil, $animate) {
     }
 
     function initMessageElement(element) {
+      var containerEl = $mdUtil.getClosest(element, "md-input-container");
+      console.log(containerEl); 
+
       // var mdInputEl = element.parent().find('input');
       // mdInputEl.on('focus', function () {
       //   console.log('focusing');
@@ -1047,12 +1055,42 @@ function mdInputInvalidMessagesAnimation($$AnimateRunner, $animateCss, $mdUtil) 
 
   return {
     addClass: function(element, className, done) {
+      console.log('adding class: '+className);
+      hideHintMessage(element, done);
       showInputMessages(element, done);
+    },
+
+    removeClass: function(element, className, done) {
+      if (className === 'md-input-invalid') {
+        console.log('removing class: '+className);
+        showHintMessage(element, done);
+      }
     }
 
     // NOTE: We do not need the removeClass method, because the message ng-leave animation will fire
   };
 }
+
+function mdInputFocusedAnimation($$AnimateRunner, $animateCss, $mdUtil, $log) {
+  saveSharedServices($$AnimateRunner, $animateCss, $mdUtil, $log);
+
+  return {
+    addClass: function(element, className, done) {
+      if (className === 'md-input-focused' && !element.hasClass('md-input-invalid')) {
+        console.log('adding class: '+className);
+        showHintMessage(element, done);
+      }
+    },
+
+    removeClass: function(element, className, done) {
+      console.log('removing class: '+className);
+      hideHintMessage(element, done);
+    }
+
+    // NOTE: We do not need the removeClass method, because the message ng-leave animation will fire
+  };
+}
+
 
 function mdInputHintAnimation($$AnimateRunner, $animateCss, $mdUtil, $log) {
   saveSharedServices($$AnimateRunner, $animateCss, $mdUtil, $log);
@@ -1146,12 +1184,26 @@ function showInputMessages(element, done) {
   }
 
   angular.forEach(children, function(child) {
-    animator = showMessage(angular.element(child));
-
-    animators.push(animator.start());
+    var childElement = angular.element(child);
+    if (childElement.hasClass('md-input-message-animation')) {
+      animator = showMessage(childElement);
+      animators.push(animator.start());
+    }
   });
 
   $$AnimateRunner.all(animators, done);
+}
+
+function hideHintMessage(element, done) {
+  var hint = element.find('md-input-hint');
+  var animator = hideMessage(hint);
+  animator.start().done(done);
+}
+
+function showHintMessage(element, done) {
+  var hint = element.find('md-input-hint');
+  var animator = showMessage(hint);
+  animator.start().done(done);
 }
 
 function hideInputMessages(element, done) {
