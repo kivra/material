@@ -257,52 +257,11 @@ md-input-container {
       @include rtl(padding-left, 0, rem(0.5));
     }
   }
-
-//   &:not(.md-input-focused),
-//   &.md-input-invalid {
-//     .md-auto-hide {
-//       .md-input-hint-animation {
-//         opacity: 0;
-//         margin-top: -100px;
-//       }
-//     }
-//   }
-
-// //   &.md-input-invalid {
-// //     .md-input-hint-animation {
-// //       display: none
-// //     }
-// //   }
-
-// //   &:not(.md-input-invalid) {
-// //     .md-input-message-animation {
-// //       display: none
-// //     }
-// //   }
-
-
-//   &:not(.md-input-invalid) {
-//     .md-auto-hide {
-//       .md-input-message-animation {
-//         display: none;
-//         opacity: 0;
-//         margin-top: -100px;
-//       }
-//     }
-//   }
-
 //   // Note: This is a workaround to fix an ng-enter flicker bug
   .md-input-message-animation, .md-input-hint-animation {
     .ng-animate {
       position: absolute;
     }
-
-//   .md-input-message-animation {
-//     &.ng-enter {
-//       opacity: 0;
-//       margin-top: -100px;
-//     }
-//   }
 
   &.md-input-focused,
   &.md-input-has-placeholder,
