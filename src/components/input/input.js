@@ -1192,20 +1192,21 @@ function showMessage(element) {
   var container = getInputElement(element);
 
   // Check to see if the message is already visible so we can skip
-  var alreadyVisible = (topMargin > -height);
+  // var alreadyVisible = (topMargin > -height);
 
-  // If we have the md-auto-hide class, the md-input-invalid animation will fire, so we can skip
-  if (alreadyVisible || (messages.hasClass('md-auto-hide') && !container.hasClass('md-input-invalid'))) {
-    console.log('skipping showing of message', element);
-    return $animateCss(element, {});
-  }
+  // // If we have the md-auto-hide class, the md-input-invalid animation will fire, so we can skip
+  // if (alreadyVisible || (messages.hasClass('md-auto-hide') && !container.hasClass('md-input-invalid'))) {
+  //   console.log('skipping showing of message', element);
+  //   return $animateCss(element, {});
+  // }
 
+  var fromPos = -height;
   console.log('showing message', element);
   return $animateCss(element, {
     event: 'enter',
     structural: true,
-    from: {"opacity": 0, "margin-top": -height + "px"},
-    to: {"opacity": 1, "margin-top": "0"},
+    from: {"opacity": 0, "transform": "translateY("+fromPos+"px)"},
+    to: {"opacity": 1, "transform": "translateY("+0+"px)"},
     duration: 0.3
   });
 }
@@ -1219,12 +1220,14 @@ function hideMessage(element) {
     return $animateCss(element, {});
   }
 
+  var numSiblings = element.parent().children().length;
+  var toTopPos = (numSiblings > 1) ? height : -height;
   // Otherwise, animate
   return $animateCss(element, {
     event: 'leave',
     structural: true,
-    from: {"opacity": 1, "margin-top": 0},
-    to: {"opacity": 0, "margin-top": -height + "px"},
+    from: {"opacity": 1, "transform": "translateY("+0+"px)"},
+    to: {"opacity": 0, "transform": "translateY("+toTopPos+"px)"},
     duration: 0.3
   });
 }

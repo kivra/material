@@ -219,12 +219,20 @@ md-input-container {
     position: relative;
     order: 4;
     overflow: hidden;
+    height: $input-error-line-height + $error-padding-top;
     @include rtl(clear, left, right);
 
+    &.ng-enter {
+      // Upon entering the DOM, messages should be hidden
+      .md-input-message-animation {
+        opacity: 0;
+      }
+    }
   }
 
   .md-input-hint-animation {
     color: gray;
+    display: block;
   }
 
   .md-input-message-animation, .md-input-hint-animation, .md-char-counter {
@@ -235,7 +243,8 @@ md-input-container {
     transition: $swift-ease-in;
 
     // Default state for messages is to be visible
-    opacity: 1;
+    position: absolute;
+    opacity: 0;
     margin-top: 0;
 
     // Add some top padding which is equal to half the difference between the expected height
@@ -249,53 +258,51 @@ md-input-container {
     }
   }
 
-  &:not(.md-input-focused),
-  &.md-input-invalid {
-    .md-auto-hide {
-      .md-input-hint-animation {
-        opacity: 0;
-        margin-top: -100px;
-      }
-    }
-  }
-
+//   &:not(.md-input-focused),
 //   &.md-input-invalid {
-//     .md-input-hint-animation {
-//       display: none
+//     .md-auto-hide {
+//       .md-input-hint-animation {
+//         opacity: 0;
+//         margin-top: -100px;
+//       }
 //     }
 //   }
+
+// //   &.md-input-invalid {
+// //     .md-input-hint-animation {
+// //       display: none
+// //     }
+// //   }
+
+// //   &:not(.md-input-invalid) {
+// //     .md-input-message-animation {
+// //       display: none
+// //     }
+// //   }
+
 
 //   &:not(.md-input-invalid) {
-//     .md-input-message-animation {
-//       display: none
+//     .md-auto-hide {
+//       .md-input-message-animation {
+//         display: none;
+//         opacity: 0;
+//         margin-top: -100px;
+//       }
 //     }
 //   }
 
-
-  &:not(.md-input-invalid) {
-    .md-auto-hide {
-      .md-input-message-animation {
-        display: none;
-        opacity: 0;
-        margin-top: -100px;
-      }
-    }
-  }
-
-  .md-input-message-animation {
-    // Enter animation
-    // Pre-animation state is transparent and off target
-    &.ng-enter-prepare {
-      opacity: 0;
-      margin-top: -100px;
+//   // Note: This is a workaround to fix an ng-enter flicker bug
+  .md-input-message-animation, .md-input-hint-animation {
+    .ng-animate {
+      position: absolute;
     }
 
-    // First keyframe of entry animation
-    &.ng-enter:not(.ng-enter-active) {
-      opacity: 0;
-      margin-top: -100px;
-    }
-  }
+//   .md-input-message-animation {
+//     &.ng-enter {
+//       opacity: 0;
+//       margin-top: -100px;
+//     }
+//   }
 
   &.md-input-focused,
   &.md-input-has-placeholder,

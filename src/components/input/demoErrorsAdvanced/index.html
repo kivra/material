@@ -42,8 +42,6 @@
           <label>Social Security Number</label>
           <input name="social" ng-model="user.social" ng-pattern="/^[0-9]{3}-[0-9]{2}-[0-9]{4}$/" />
 
-          <div class="hint" ng-if="showHints">###-##-####</div>
-
           <div ng-messages="userForm.social.$error" ng-if="!showHints">
             <div ng-message="pattern">###-##-#### - Please enter a valid SSN.</div>
           </div>
@@ -58,8 +56,6 @@
           <input name="email" ng-model="user.email"
                  required minlength="10" maxlength="100" ng-pattern="/^.+@.+\..+$/" />
 
-          <div class="hint" ng-show="showHints">How can we reach you?</div>
-
           <div ng-messages="userForm.email.$error" ng-hide="showHints">
             <div ng-message-exp="['required', 'minlength', 'maxlength', 'pattern']">
               Your email must be between 10 and 100 characters long and look like an e-mail address.
@@ -73,14 +69,16 @@
 
         <md-input-container class="md-block" flex-gt-sm>
           <label>Phone Number</label>
-          <input name="phone" ng-model="user.phone" ng-pattern="/^[(][0-9]{3}[)] [0-9]{3}-[0-9]{4}$/" />
+          <input name="phone" ng-model="user.phone" autocomplete="off" ng-pattern="/^[(][0-9]{3}[)] [0-9]{3}-[0-9]{4}$/" />
 
           <div ng-messages="userForm.phone.$error">
             <div ng-message="pattern">(###) ###-#### - Please enter a valid phone number.</div>
             <md-input-hint>(###) ###-####</md-input-hint>
           </div>
         </md-input-container>
-
+        <div>
+          <p> bottom line</p>
+        </div>
         <style>
           /*
            * The Material demos system does not currently allow targeting the body element, so this
