@@ -1185,7 +1185,7 @@ function showMessage(element) {
     event: 'enter',
     structural: true,
     from: {"opacity": 0, "transform": "translateY("+fromPos+"px)"},
-    to: {"opacity": 1, "transform": "translateY("+0+"px)"},
+    to: {"opacity": 1, "transform": "translateY(0px)"},
     duration: 0.3
   });
 }
@@ -1207,7 +1207,7 @@ function hideMessage(element) {
   return $animateCss(element, {
     event: 'leave',
     structural: true,
-    from: {"opacity": 1, "transform": "translateY("+0+"px)"},
+    from: {"opacity": 1, "transform": "translateY(0px)"},
     to: {"opacity": 0, "transform": "translateY("+toTopPos+"px)"},
     duration: 0.3
   });

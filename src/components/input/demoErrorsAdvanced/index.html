@@ -54,7 +54,7 @@
         <md-input-container class="md-block" flex-gt-sm>
           <label>Email</label>
           <input name="email" ng-model="user.email"
-                 required minlength="10" maxlength="100" ng-pattern="/^.+@.+\..+$/" />
+                 autocomplete="off" required minlength="10" maxlength="100" ng-pattern="/^.+@.+\..+$/" />
 
           <div ng-messages="userForm.email.$error">
             <div ng-message-exp="['required', 'minlength', 'maxlength', 'pattern']">
@@ -69,16 +69,16 @@
 
         <md-input-container class="md-block" flex-gt-sm>
           <label>Phone Number</label>
-          <input name="phone" ng-model="user.phone" autocomplete="off" ng-pattern="/^[(][0-9]{3}[)] [0-9]{3}-[0-9]{4}$/" />
+          <input name="phone" min="9" required ng-model="user.phone" autocomplete="off" ng-pattern="/^[(][0-9]{3}[)] [0-9]{3}-[0-9]{4}$/" />
 
-          <div ng-messages="userForm.phone.$error">
+          <div ng-messages="userForm.phone.$error" multiple>
+            <div ng-message="required">phone number required</div>
             <div ng-message="pattern">(###) ###-#### - Please enter a valid phone number.</div>
+            <div ng-message="min">(###) ###-#### - Phone number too short.</div>
             <md-input-hint>(###) ###-####</md-input-hint>
           </div>
         </md-input-container>
-        <div>
-          <p> bottom line</p>
-        </div>
+       </div>
         <style>
           /*
            * The Material demos system does not currently allow targeting the body element, so this
