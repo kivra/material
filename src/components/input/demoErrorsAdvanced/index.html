@@ -26,11 +26,10 @@
           <label>Name</label>
           <input md-maxlength="30" required name="name" ng-model="user.name" />
 
-          <div class="hint" ng-if="showHints">Tell us what we should call you!</div>
-
           <div ng-messages="userForm.name.$error" ng-if="!showHints">
             <div ng-message="required">Name is required.</div>
             <div ng-message="md-maxlength">The name has to be less than 30 characters long.</div>
+            <md-input-hint>If you have a funny name we will not make fun of you</md-input-hint>
           </div>
         </md-input-container>
 
@@ -42,8 +41,9 @@
           <label>Social Security Number</label>
           <input name="social" ng-model="user.social" ng-pattern="/^[0-9]{3}-[0-9]{2}-[0-9]{4}$/" />
 
-          <div ng-messages="userForm.social.$error" ng-if="!showHints">
+          <div ng-messages="userForm.social.$error">
             <div ng-message="pattern">###-##-#### - Please enter a valid SSN.</div>
+            <md-input-hint>We keep all your personal information safe</md-input-hint>
           </div>
         </md-input-container>
 

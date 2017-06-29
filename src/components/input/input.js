@@ -1022,23 +1022,6 @@ function mdInputHintDirective($mdUtil, $animate) {
 
     function initMessageElement(element) {
       var containerEl = $mdUtil.getClosest(element, "md-input-container");
-      console.log(containerEl); 
-
-      // var mdInputEl = element.parent().find('input');
-      // mdInputEl.on('focus', function () {
-      //   console.log('focusing');
-      //   element.append('<div>'+scope.mdInputHint+'</div>');
-      //   console.log(childEl);
-      //   // element.removeClass("ng-hide");
-      //   // $animate.removeClass(element, "ng-hide");
-      // });
-      // mdInputEl.on('blur', function () {
-      //   console.log('blurring');
-      //   element.empty();
-      //   // element.addClass("ng-hide");
-      //   // $animate.addClass(element, "ng-hide");
-      // });
-
       element.toggleClass("md-auto-hide", true);
       element.toggleClass("md-input-hint-animation", true);
       // Add our animation class
@@ -1186,21 +1169,23 @@ function hideInputMessages(element, done) {
 
 function showMessage(element) {
   var height = parseInt(window.getComputedStyle(element[0]).height);
-  var topMargin = parseInt(window.getComputedStyle(element[0]).marginTop);
+  var opacity = parseFloat(window.getComputedStyle(element[0]).opacity);
 
   var messages = getMessagesElement(element);
   var container = getInputElement(element);
 
-  // Check to see if the message is already visible so we can skip
-  // var alreadyVisible = (topMargin > -height);
+  // Check to see if the message is already visible or has started it's animation, if so we can skip
+  var alreadyVisible = (opacity > 0);
 
-  // // If we have the md-auto-hide class, the md-input-invalid animation will fire, so we can skip
-  // if (alreadyVisible || (messages.hasClass('md-auto-hide') && !container.hasClass('md-input-invalid'))) {
-  //   console.log('skipping showing of message', element);
-  //   return $animateCss(element, {});
-  // }
+  // If we have the md-auto-hide class, the md-input-invalid animation will fire, so we can skip
+  if (alreadyVisible || (messages.hasClass('md-auto-hide') && !container.hasClass('md-input-invalid'))) {
+    console.log('skipping showing of message', element);
+    return $animateCss(element, {});
+  }
 
+  // we always let messages enter from above
   var fromPos = -height;
+
   console.log('showing message', element);
   return $animateCss(element, {
     event: 'enter',
@@ -1220,8 +1205,10 @@ function hideMessage(element) {
     return $animateCss(element, {});
   }
 
+  // If another message is replacing this it will come from above and this one needs to be animated out downwards
   var numSiblings = element.parent().children().length;
   var toTopPos = (numSiblings > 1) ? height : -height;
+
   // Otherwise, animate
   return $animateCss(element, {
     event: 'leave',
