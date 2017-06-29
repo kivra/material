@@ -13,12 +13,14 @@ var inputModule = angular.module('material.components.input', [
   .directive('placeholder', placeholderDirective)
   .directive('ngMessages', ngMessagesDirective)
   .directive('ngMessage', ngMessageDirective)
+  .directive('mdInputHint', mdInputHintDirective)
   .directive('ngMessageExp', ngMessageDirective)
   .directive('mdSelectOnFocus', mdSelectOnFocusDirective)
 
   .animation('.md-input-invalid', mdInputInvalidMessagesAnimation)
+  .animation('.md-input-focused', mdInputFocusedAnimation)
   .animation('.md-input-messages-animation', ngMessagesAnimation)
-  .animation('.md-input-message-animation', ngMessageAnimation);
+  .animation('.md-input-message-animation', ngMessageAnimation)
 
 // If we are running inside of tests; expose some extra services so that we can test them
 if (window._mdMocksIncluded) {
@@ -131,7 +133,11 @@ function mdInputContainerDirective($mdTheming, $parse) {
     };
     self.element = $element;
     self.setFocused = function(isFocused) {
-      $element.toggleClass('md-input-focused', !!isFocused);
+      if (isFocused) {
+        $animate.addClass($element, 'md-input-focused');
+      } else {
+        $animate.removeClass($element, 'md-input-focused');
+      }
     };
     self.setHasValue = function(hasValue) {
       $element.toggleClass('md-input-has-value', !!hasValue);
@@ -904,6 +910,59 @@ function ngMessageDirective($mdUtil) {
   }
 }
 
+function mdInputHintDirective($mdUtil, $animate) {
+  return {
+    restrict: 'EA',
+    link: link,
+    scope: {
+      mdInputHint: '='
+    },
+    priority: 100
+  };
+
+  function link(scope, tElement) {
+    if (!isInsideInputContainer(tElement)) {
+
+      // When the current element is inside of a document fragment, then we need to check for an input-container
+      // in the postLink, because the element will be later added to the DOM and is currently just in a temporary
+      // fragment, which causes the input-container check to fail.
+      if (isInsideFragment()) {
+        return function (scope, element) {
+          if (isInsideInputContainer(element)) {
+            // Inside of the postLink function, a ngMessage directive will be a comment element, because it's
+            // currently hidden. To access the shown element, we need to use the element from the compile function.
+            initMessageElement(tElement);
+          }
+        };
+      }
+    } else {
+      initMessageElement(tElement);
+    }
+
+    function isInsideFragment() {
+      var nextNode = tElement[0];
+      while (nextNode = nextNode.parentNode) {
+        if (nextNode.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function isInsideInputContainer(element) {
+      return !!$mdUtil.getClosest(element, "md-input-container");
+    }
+
+    function initMessageElement(element) {
+      var containerEl = $mdUtil.getClosest(element, "md-input-container");
+      element.toggleClass("md-auto-hide", true);
+      element.toggleClass("md-input-hint-animation", true);
+      // Add our animation class
+    }
+  }
+}
+
+
 var $$AnimateRunner, $animateCss, $mdUtil, $log;
 
 function mdInputInvalidMessagesAnimation($$AnimateRunner, $animateCss, $mdUtil, $log) {
@@ -911,10 +970,33 @@ function mdInputInvalidMessagesAnimation($$AnimateRunner, $animateCss, $mdUtil, 
 
   return {
     addClass: function(element, className, done) {
+      toggleHintMessage(element, done, false);
       showInputMessages(element, done);
+    },
+
+    removeClass: function(element, className, done) {
+      if (className === 'md-input-invalid') {
+        // NOTE: We do not need the hide error messages, because the message ng-leave animation will fire
+        toggleHintMessage(element, done, true);
+      }
     }
 
-    // NOTE: We do not need the removeClass method, because the message ng-leave animation will fire
+  };
+}
+
+function mdInputFocusedAnimation($$AnimateRunner, $animateCss, $mdUtil, $log) {
+  saveSharedServices($$AnimateRunner, $animateCss, $mdUtil, $log);
+
+  return {
+    addClass: function(element, className, done) {
+      if (className === 'md-input-focused' && !element.hasClass('md-input-invalid')) {
+        toggleHintMessage(element, done, true);
+      }
+    },
+
+    removeClass: function(element, className, done) {
+      toggleHintMessage(element, done, false);
+    }
   };
 }
 
@@ -978,12 +1060,22 @@ function showInputMessages(element, done) {
   }
 
   angular.forEach(children, function(child) {
-    animator = showMessage(angular.element(child));
-
-    animators.push(animator.start());
+    var childElement = angular.element(child);
+    if (childElement.hasClass('md-input-message-animation')) {
+      animator = showMessage(childElement);
+      animators.push(animator.start());
+    }
   });
 
   $$AnimateRunner.all(animators, done);
+}
+
+function toggleHintMessage(element, done, shouldShow) {
+  var hintEl = element.find('md-input-hint');
+  if (hintEl.length > 0) {
+    var animator = (shouldShow) ? showMessage(hintEl) : hideMessage(hintEl);
+    animator.start().done(done);
+  }
 }
 
 function hideInputMessages(element, done) {
@@ -1008,24 +1100,27 @@ function hideInputMessages(element, done) {
 
 function showMessage(element) {
   var height = parseInt(window.getComputedStyle(element[0]).height);
-  var topMargin = parseInt(window.getComputedStyle(element[0]).marginTop);
+  var opacity = parseFloat(window.getComputedStyle(element[0]).opacity);
 
   var messages = getMessagesElement(element);
   var container = getInputElement(element);
 
-  // Check to see if the message is already visible so we can skip
-  var alreadyVisible = (topMargin > -height);
+  // Check to see if the message is already visible or has started it's animation, if so we can skip
+  var alreadyVisible = (opacity > 0);
 
   // If we have the md-auto-hide class, the md-input-invalid animation will fire, so we can skip
   if (alreadyVisible || (messages.hasClass('md-auto-hide') && !container.hasClass('md-input-invalid'))) {
     return $animateCss(element, {});
   }
 
+  // we always let messages enter from above
+  var fromPos = -height;
+
   return $animateCss(element, {
     event: 'enter',
     structural: true,
-    from: {"opacity": 0, "margin-top": -height + "px"},
-    to: {"opacity": 1, "margin-top": "0"},
+    from: {"opacity": 0, "transform": "translateY("+fromPos+"px)"},
+    to: {"opacity": 1, "transform": "translateY(0px)"},
     duration: 0.3
   });
 }
@@ -1039,12 +1134,16 @@ function hideMessage(element) {
     return $animateCss(element, {});
   }
 
+  // If another message is replacing this it will come from above and this one needs to be animated out downwards
+  var numSiblings = element.parent().children().length;
+  var toTopPos = (numSiblings > 1) ? height : -height;
+
   // Otherwise, animate
   return $animateCss(element, {
     event: 'leave',
     structural: true,
-    from: {"opacity": 1, "margin-top": 0},
-    to: {"opacity": 0, "margin-top": -height + "px"},
+    from: {"opacity": 1, "transform": "translateY(0px)"},
+    to: {"opacity": 0, "transform": "translateY("+toTopPos+"px)"},
     duration: 0.3
   });
 }

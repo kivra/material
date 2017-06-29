@@ -217,18 +217,23 @@ md-input-container {
     position: relative;
     order: 4;
     overflow: hidden;
+    min-height: $input-error-line-height + $error-padding-top;
     @include rtl(clear, left, right);
 
     &.ng-enter {
       // Upon entering the DOM, messages should be hidden
       .md-input-message-animation {
         opacity: 0;
-        margin-top: -100px;
       }
     }
   }
 
-  .md-input-message-animation, .md-char-counter {
+  .md-input-hint-animation {
+    color: gray;
+    display: block;
+  }
+
+  .md-input-message-animation, .md-input-hint-animation, .md-char-counter {
     font-size: $input-error-font-size;
     line-height: $input-error-line-height;
     overflow: hidden;
@@ -236,7 +241,9 @@ md-input-container {
     transition: $swift-ease-in;
 
     // Default state for messages is to be visible
-    opacity: 1;
+    position: absolute;
+    opacity: 0;
+    top: 0px;
     margin-top: 0;
 
     // Add some top padding which is equal to half the difference between the expected height
@@ -249,30 +256,26 @@ md-input-container {
       @include rtl(padding-left, 0, rem(0.5));
     }
   }
-
-  &:not(.md-input-invalid) {
-    .md-auto-hide {
-      .md-input-message-animation {
-        opacity: 0;
-        margin-top: -100px;
-      }
+//   // Note: This is a workaround to fix an ng-enter flicker bug
+  .md-input-message-animation, .md-input-hint-animation {
+    .ng-animate {
+      position: absolute;
+      top: 0px;
     }
   }
 
-  // Note: This is a workaround to fix an ng-enter flicker bug
-  .md-input-message-animation {
-    &:not(.ng-animate) {
-      opacity: 0;
-      margin-top: -100px;
+  &.md-input-focused:not(.md-input-invalid) {
+    .md-input-hint-animation:not(.ng-animate) {
+      position: relative;
     }
   }
 
-  .md-input-message-animation {
-    &.ng-enter {
-      opacity: 0;
-      margin-top: -100px;
+  &.md-input-invalid {
+    .md-input-message-animation:not(.ng-animate) {
+      position: relative;
     }
   }
+
 
   &.md-input-focused,
   &.md-input-has-placeholder,
