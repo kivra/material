@@ -1037,14 +1037,14 @@ function mdInputInvalidMessagesAnimation($$AnimateRunner, $animateCss, $mdUtil) 
 
   return {
     addClass: function(element, className, done) {
-      hideHintMessage(element, done);
+      toggleHintMessage(element, done, false);
       showInputMessages(element, done);
     },
 
     removeClass: function(element, className, done) {
       if (className === 'md-input-invalid') {
         // NOTE: We do not need the hide error messages, because the message ng-leave animation will fire
-        showHintMessage(element, done);
+        toggleHintMessage(element, done, true);
       }
     }
 
@@ -1057,12 +1057,12 @@ function mdInputFocusedAnimation($$AnimateRunner, $animateCss, $mdUtil, $log) {
   return {
     addClass: function(element, className, done) {
       if (className === 'md-input-focused' && !element.hasClass('md-input-invalid')) {
-        showHintMessage(element, done);
+        toggleHintMessage(element, done, true);
       }
     },
 
     removeClass: function(element, className, done) {
-      hideHintMessage(element, done);
+      toggleHintMessage(element, done, false);
     }
   };
 }
@@ -1136,16 +1136,12 @@ function showInputMessages(element, done) {
   $$AnimateRunner.all(animators, done);
 }
 
-function hideHintMessage(element, done) {
-  var hint = element.find('md-input-hint');
-  var animator = hideMessage(hint);
-  animator.start().done(done);
-}
-
-function showHintMessage(element, done) {
-  var hint = element.find('md-input-hint');
-  var animator = showMessage(hint);
-  animator.start().done(done);
+function toggleHintMessage(element, done, shouldShow) {
+  var hintEl = element.find('md-input-hint');
+  if (hintEl.length > 0) {
+    var animator = (shouldShow) ? showMessage(hintEl) : hideMessage(hintEl);
+    animator.start().done(done);
+  }
 }
 
 function hideInputMessages(element, done) {
@@ -1179,14 +1175,12 @@ function showMessage(element) {
 
   // If we have the md-auto-hide class, the md-input-invalid animation will fire, so we can skip
   if (alreadyVisible || (messages.hasClass('md-auto-hide') && !container.hasClass('md-input-invalid'))) {
-    console.log('skipping showing of message', element);
     return $animateCss(element, {});
   }
 
   // we always let messages enter from above
   var fromPos = -height;
 
-  console.log('showing message', element);
   return $animateCss(element, {
     event: 'enter',
     structural: true,

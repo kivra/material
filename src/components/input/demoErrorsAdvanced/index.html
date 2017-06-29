@@ -56,7 +56,7 @@
           <input name="email" ng-model="user.email"
                  required minlength="10" maxlength="100" ng-pattern="/^.+@.+\..+$/" />
 
-          <div ng-messages="userForm.email.$error" ng-hide="showHints">
+          <div ng-messages="userForm.email.$error">
             <div ng-message-exp="['required', 'minlength', 'maxlength', 'pattern']">
               Your email must be between 10 and 100 characters long and look like an e-mail address.
             </div>
