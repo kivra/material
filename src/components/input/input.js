@@ -13,7 +13,7 @@ var inputModule = angular.module('material.components.input', [
   .directive('placeholder', placeholderDirective)
   .directive('ngMessages', ngMessagesDirective)
   .directive('ngMessage', ngMessageDirective)
-  .directive('ngInputHint', mdInputHintDirective)
+  .directive('mdInputHint', mdInputHintDirective)
   .directive('ngMessageExp', ngMessageDirective)
   .directive('mdSelectOnFocus', mdSelectOnFocusDirective)
 
@@ -977,17 +977,14 @@ function ngMessageDirective($mdUtil) {
   }
 }
 
-function mdInputHintDirective($mdUtil, $animate) {
+function mdInputHintDirective($mdUtil) {
   return {
     restrict: 'EA',
-    link: link,
-    scope: {
-      mdInputHint: '='
-    },
+    compile: compile,
     priority: 100
   };
 
-  function link(scope, tElement) {
+  function compile(tElement) {
     if (!isInsideInputContainer(tElement)) {
 
       // When the current element is inside of a document fragment, then we need to check for an input-container
@@ -1021,10 +1018,10 @@ function mdInputHintDirective($mdUtil, $animate) {
     }
 
     function initMessageElement(element) {
+      // Add our animation class
       var containerEl = $mdUtil.getClosest(element, "md-input-container");
       element.toggleClass("md-auto-hide", true);
       element.toggleClass("md-input-hint-animation", true);
-      // Add our animation class
     }
   }
 }
