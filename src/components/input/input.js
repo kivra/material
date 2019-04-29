@@ -1036,7 +1036,15 @@ function mdInputInvalidMessagesAnimation($$AnimateRunner, $animateCss, $mdUtil) 
 
   return {
     addClass: function(element, className, done) {
+      toggleHintMessage(element, done, false);
       showInputMessages(element, done);
+    },
+
+    removeClass: function(element, className, done) {
+      if (className === 'md-input-invalid') {
+        // NOTE: We do not need the hide error messages, because the message ng-leave animation will fire
+        toggleHintMessage(element, done, true);
+      }
     }
 
     // NOTE: We do not need the removeClass method, because the message ng-leave animation will fire
