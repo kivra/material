@@ -219,19 +219,27 @@ md-input-container {
     position: relative;
     order: 4;
     overflow: hidden;
+    min-height: $input-error-line-height + $error-padding-top;
     @include rtl(clear, left, right);
 
   }
 
-  .md-input-message-animation, .md-char-counter {
+  .md-input-hint-animation {
+    color: gray;
+    display: block;
+  }
+
+  .md-input-message-animation, .md-char-counter, .md-input-hint-animation {
     font-size: $input-error-font-size;
     line-height: $input-error-line-height;
     overflow: hidden;
 
     transition: $swift-ease-in;
 
-    // Default state for messages is to be visible
-    opacity: 1;
+    // Default state for messages is to be invisible
+    opacity: 0;
+    position: absolute;
+    top: 0px;
     margin-top: 0;
 
     // Add some top padding which is equal to half the difference between the expected height
@@ -245,27 +253,22 @@ md-input-container {
     }
   }
 
-  &:not(.md-input-invalid) {
-    .md-auto-hide {
-      .md-input-message-animation {
-        opacity: 0;
-        margin-top: -100px;
-      }
+  .md-input-message-animation, .md-input-hint-animation {
+    .ng-animate {
+      position: absolute;
+      top: 0px;
     }
   }
 
-  .md-input-message-animation {
-    // Enter animation
-    // Pre-animation state is transparent and off target
-    &.ng-enter-prepare {
-      opacity: 0;
-      margin-top: -100px;
+  &.md-input-focused:not(.md-input-invalid) {
+    .md-input-hint-animation:not(.ng-animate) {
+      position: relative;
     }
+  }
 
-    // First keyframe of entry animation
-    &.ng-enter:not(.ng-enter-active) {
-      opacity: 0;
-      margin-top: -100px;
+  &.md-input-invalid {
+    .md-input-message-animation:not(.ng-animate) {
+      position: relative;
     }
   }
 
