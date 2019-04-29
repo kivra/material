@@ -13,7 +13,7 @@ var inputModule = angular.module('material.components.input', [
   .directive('placeholder', placeholderDirective)
   .directive('ngMessages', ngMessagesDirective)
   .directive('ngMessage', ngMessageDirective)
-  .directive('ngInputHint', ngInputHintDirective)
+  .directive('ngInputHint', mdInputHintDirective)
   .directive('ngMessageExp', ngMessageDirective)
   .directive('mdSelectOnFocus', mdSelectOnFocusDirective)
 
